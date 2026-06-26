@@ -74,9 +74,10 @@ HIGH RISK  → Suggest only
 ---
 
 ## System Architecture
-<img width="1600" height="615" alt="WhatsApp Image 2026-06-26 at 4 18 01 PM" src="https://github.com/user-attachments/assets/075d2950-a39c-434b-a6ca-99e695ce290c" />
 
-<img width="1475" height="1600" alt="WhatsApp Image 2026-06-26 at 4 17 06 PM" src="https://github.com/user-attachments/assets/d70405b6-f9c1-4d08-8581-0ef90d708fbb" />
+<img width="1475" height="1600" alt="IMG 1" src="https://github.com/user-attachments/assets/4bce3741-14aa-402c-bd7d-4007b99fbab8" />
+
+
 
 ---
 
