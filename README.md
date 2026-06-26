@@ -65,21 +65,15 @@ This project automates that workflow using a **multi-agent AI system**.
 - Suggests fixes before a production outage happens
 - Automatically applies safe remediations
 - Supports multiple execution modes:
+ ## System Architecture
+<img width="1475" height="1600" alt="IMG 1" src="https://github.com/user-attachments/assets/8db84d31-150b-4f24-a9a9-8bdbbf161443" />
+
 
 ```text
 SAFE       → Auto-execute
 MEDIUM     → Human approval required
 HIGH RISK  → Suggest only
 
----
-
-## System Architecture
-
-<img width="1475" height="1600" alt="IMG 1" src="https://github.com/user-attachments/assets/4bce3741-14aa-402c-bd7d-4007b99fbab8" />
-
-
-
----
 
 ## Workflow Step-by-Step
 
