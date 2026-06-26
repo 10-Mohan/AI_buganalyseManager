@@ -1,62 +1,82 @@
 # AI_buganalyseManager (AI Incident Response Manager)
 
 AI_buganalyseManager is an agentic, multi-stage incident response automation pipeline built on top of the Google Agent Development Kit (ADK) and FastAPI. It orchestrates a team of specialized AI agents working sequentially and in parallel to parse raw production logs, diagnose root causes against a known runbook database, recommend remediation commands, draft communications, and merge everything into a unified incident report.
+**Predict. Prevent. Fix. Protect.**  
+> An AI-powered SRE system that proactively detects failures, predicts incidents, recommends fixes, and performs safe auto-remediation before users are impacted.
+
 
 ![Dashboard Mockup](images/dashboard_mockup.png)
 
 ---
 
-## Key Features
+## 🏆 Project Overview
 
-1. **Quota-Aware Adaptive Backoff**: Dynamically extracts the exact `retryDelay` or `Please retry in X.XXs` guidelines from Google GenAI API errors, sleeping for the requested duration plus a safety margin to guarantee the next attempt succeeds.
-2. **Model Quota Rotation**: Automatically cycles through a candidate list of models (`gemini-2.5-flash`, `gemini-2.0-flash`, `gemini-1.5-flash`) on quota exhaustion (429 errors) or support limitations (404 NOT_FOUND errors) to split load across distinct quota pools.
-3. **Heuristic Schema Fallback Mode**: If all model attempts fail due to complete API daily quota exhaustion, the pipeline executes a local parser that uses regex heuristics to generate valid, schema-compliant responses. This keeps the application fully functional for submissions and testing.
-4. **Interactive Dashboard**: Serves a live, modern incident response frontend (`/`) showing telemetry metrics, log details, parsed diagnostics, and clickable action plans.
+**AI Incident Response Manager** is a multi-agent reliability platform designed to help engineering teams move from **reactive incident handling** to **proactive incident prevention**.
+
+Instead of waiting for systems to fail, this tool continuously analyzes:
+
+- Logs
+- Metrics
+- Traces
+- Deployments
+- Alerts
+- SLO / SLI signals
+- Service dependencies
+
+It uses AI agents to detect early warning signs, predict possible incidents, identify root causes, suggest fixes, and safely execute low-risk auto-healing actions.
+
+---
+
+## ✨ One-Line Pitch
+
+> **Your AI SRE team that predicts, prevents, and fixes incidents automatically.**
+
+---
+
+## 🧠 Why This Project?
+
+Modern production systems are complex. During incidents, engineers need to quickly:
+
+- Understand alerts
+- Analyze logs
+- Check recent deployments
+- Identify root cause
+- Suggest mitigation
+- Communicate updates
+- Prevent recurrence
+
+This project automates that workflow using a **multi-agent AI system**.
+
+---
+
+## 🚀 Unique Features
+
+### 🧠 Proactive Failure Prediction Engine
+
+- Continuously monitors logs, metrics, deployments, traces, and SLO signals
+- Detects anomalies before they become incidents
+- Predicts possible service failures before customer impact
+- Provides confidence score and estimated time-to-impact
+
+---
+
+### ⚡ Auto-Fix Before Incident
+
+- Suggests fixes before a production outage happens
+- Automatically applies safe remediations
+- Supports multiple execution modes:
+
+```text
+SAFE       → Auto-execute
+MEDIUM     → Human approval required
+HIGH RISK  → Suggest only
 
 ---
 
 ## System Architecture
+<img width="1600" height="615" alt="WhatsApp Image 2026-06-26 at 4 18 01 PM" src="https://github.com/user-attachments/assets/075d2950-a39c-434b-a6ca-99e695ce290c" />
 
-```mermaid
-flowchart TD
-    subgraph Client Interface
-        Dashboard["Dashboard Ingestion (HTML/JS)"]
-        CLI["POST /incident Endpoint"]
-    end
-
-    subgraph Nasiko Orchestrator Engine
-        Pipeline["Nasiko Pipeline Runner"]
-        
-        subgraph Stage 1: Log Extraction [Sequential]
-            AA["Alert Analyzer Agent"]
-        end
-        
-        subgraph Stage 2: Root Cause [Sequential]
-            RC["Root Cause Agent"]
-            RB[("Runbooks Database")]
-            RC <-->|search_runbook| RB
-        end
-        
-        subgraph Stage 3: Remediation & Comms [Parallel]
-            FR["Fix Recommender Agent"]
-            CM["Comms Agent"]
-            Slack["Slack Ingress Webhook"]
-            CM -->|post_slack| Slack
-        end
-        
-        subgraph Stage 4: Merge [Script]
-            MR["merge_report.py"]
-        end
-    end
-
-    Dashboard --> Pipeline
-    CLI --> Pipeline
-    Pipeline --> Stage 1
-    Stage 1 -->|parsed log JSON| Stage 2
-    Stage 2 -->|diagnosed cause JSON| Stage 3
-    Stage 3 -->|remediations + drafts| Stage 4
-    Stage 4 -->|final unified report| Dashboard
-```
+<img width="1475" height="1600" alt="WhatsApp Image 2026-06-26 at 4 17 06 PM" src="https://github.com/user-attachments/assets/d70405b6-f9c1-4d08-8581-0ef90d708fbb" />
 
 ---
 
