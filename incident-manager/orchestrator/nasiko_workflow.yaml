@@ -1,0 +1,58 @@
+# incident-manager/orchestrator/nasiko_workflow.yaml
+name: incident-workflow
+version: 1.0.0
+description: "AI incident response manager pipeline executing sequentially and in parallel."
+
+workflow:
+  input:
+    raw_log: "string"
+    service: "string"
+    history: "string"
+
+  steps:
+    - id: alert_analyzer
+      type: sequential
+      agent: agents/alert_analyzer
+      input:
+        raw_log: "${workflow.input.raw_log}"
+        service: "${workflow.input.service}"
+      retry:
+        max_attempts: 2
+        backoff: exponential
+
+    - id: root_cause_agent
+      type: sequential
+      agent: agents/root_cause_agent
+      input:
+        alert_json: "${steps.alert_analyzer.output}"
+        history: "${workflow.input.history}"
+      retry:
+        max_attempts: 2
+        backoff: exponential
+
+    - id: recovery_and_comms
+      type: parallel
+      steps:
+        - id: fix_recommender
+          agent: agents/fix_recommender
+          input: "${steps.root_cause_agent.output}"
+          retry:
+            max_attempts: 2
+            backoff: exponential
+        - id: comms_agent
+          agent: agents/comms_agent
+          input:
+            alert_json: "${steps.alert_analyzer.output}"
+            root_cause_json: "${steps.root_cause_agent.output}"
+          retry:
+            max_attempts: 2
+            backoff: exponential
+
+    - id: merge_report
+      type: merge
+      script: orchestrator/merge_report.py
+      input:
+        alert_analyzer: "${steps.alert_analyzer.output}"
+        root_cause_agent: "${steps.root_cause_agent.output}"
+        fix_recommender: "${steps.recovery_and_comms.fix_recommender.output}"
+        comms_agent: "${steps.recovery_and_comms.comms_agent.output}"

@@ -1,0 +1,17 @@
+[
+  {
+    "service": "payments-service",
+    "raw_log": "2026-06-26 14:00:05.123 ERROR [payments-service] [main] org.postgresql.util.PSQLException: FATAL: remaining connection slots are reserved for non-replication superuser connections. Active connections = 100/100. Connection pool HikariCP exhausted.",
+    "history": "Previous occurrence 2 days ago resolved by scaling connection pool size from 50 to 100. Traffic spike detected in checkout subsystem."
+  },
+  {
+    "service": "recommendation-engine",
+    "raw_log": "2026-06-26 14:02:10.789 CRITICAL [recommendation-engine] [worker-3] kernel: [12345.678] Out of memory: Killed process 456 (python3) total-vm:4235128kB, anon-rss:2097152kB, file-rss:0kB, shmem-rss:0kB. OOMKilled event triggered for recommendation-engine-5f89c6bc7d-9xk2s.",
+    "history": "Deploy release v2.4.1 occurred 4 hours ago. Inference batch size increased from 16 to 64."
+  },
+  {
+    "service": "api-gateway",
+    "raw_log": "2026-06-26 14:05:00.001 WARNING [api-gateway] [envoy] upstream connect error or disconnect/reset before headers. reset reason: connection failure. HTTP/1.1 503 Service Unavailable, duration: 10ms, upstream: payments-service-cluster. Production ingress spike in 5xx errors.",
+    "history": "A service mesh VirtualService configuration update was deployed 5 minutes prior to the error spike."
+  }
+]

@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Incident Response Manager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #090d16;
+            --bg-surface: rgba(17, 24, 39, 0.7);
+            --border-color: rgba(255, 255, 255, 0.08);
+            
+            --color-primary: #8b5cf6;
+            --color-primary-glow: rgba(139, 92, 246, 0.15);
+            --color-secondary: #06b6d4;
+            --color-success: #10b981;
+            
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --text-title: #ffffff;
+            
+            --badge-p1: #ef4444;
+            --badge-p2: #f97316;
+            --badge-p3: #eab308;
+            --badge-p4: #3b82f6;
+            
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            background-image: 
+                radial-gradient(at 10% 20%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
+                radial-gradient(at 90% 80%, rgba(6, 182, 212, 0.08) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            font-family: var(--font-main);
+            line-height: 1.5;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            color: var(--text-title);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        h1::before {
+            content: '';
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            background-color: var(--color-primary);
+            border-radius: 50%;
+            box-shadow: 0 0 12px var(--color-primary);
+        }
+
+        .header-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .meta-tag {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            padding: 0.4rem 0.8rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .meta-tag::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--color-success);
+        }
+
+        /* Layout Grid */
+        .layout-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 1024px) {
+            .layout-grid {
+                grid-template-columns: 450px 1fr;
+            }
+        }
+
+        /* Glassmorphic Panel styling */
+        .panel {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.75rem;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            height: fit-content;
+        }
+
+        .panel-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-title);
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Form elements */
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        input[type="text"], textarea, select {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem;
+            color: var(--text-main);
+            font-family: var(--font-main);
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        input[type="text"]:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 2px var(--color-primary-glow);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+        }
+
+        .btn-submit {
+            background: var(--color-primary);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 0.85rem;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
+            background: #9d76fa;
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .btn-submit:disabled {
+            background: #4b5563;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* Demo Selector Card */
+        .demo-picker-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        /* Progress Steps Overlay */
+        .progress-overlay {
+            display: none;
+            flex-direction: column;
+            gap: 1.25rem;
+            margin-top: 0.5rem;
+        }
+
+        .progress-step {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            transition: color 0.3s ease;
+        }
+
+        .progress-step.active {
+            color: var(--color-secondary);
+            font-weight: 600;
+        }
+
+        .progress-step.completed {
+            color: var(--color-success);
+        }
+
+        .step-indicator {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .progress-step.active .step-indicator {
+            border-color: var(--color-secondary);
+            background: rgba(6, 182, 212, 0.1);
+            animation: pulse-ring 1.5s infinite;
+        }
+
+        .progress-step.completed .step-indicator {
+            border-color: var(--color-success);
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--color-success);
+        }
+
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(6, 182, 212, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0); }
+        }
+
+        /* Spinner */
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Results Area */
+        .results-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 6rem 2rem;
+            color: var(--text-muted);
+            border: 1px dashed var(--border-color);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.01);
+            text-align: center;
+            gap: 1rem;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            opacity: 0.5;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        /* Report View Components */
+        .report-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .service-info h2 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text-title);
+        }
+
+        .service-info p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .badge-severity {
+            padding: 0.35rem 0.85rem;
+            border-radius: 6px;
+            font-weight: 800;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.25);
+        }
+
+        .severity-P1 { background: var(--badge-p1); color: white; }
+        .severity-P2 { background: var(--badge-p2); color: white; }
+        .severity-P3 { background: var(--badge-p3); color: white; }
+        .severity-P4 { background: var(--badge-p4); color: white; }
+
+        /* Overview cards */
+        .overview-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .overview-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.25rem;
+        }
+
+        .card-header-small {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .root-cause-val {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--color-secondary);
+            text-transform: capitalize;
+        }
+
+        /* Confidence Progress */
+        .confidence-container {
+            margin-top: 0.75rem;
+        }
+
+        .confidence-bar-bg {
+            background: rgba(255, 255, 255, 0.05);
+            height: 8px;
+            border-radius: 4px;
+            width: 100%;
+            overflow: hidden;
+            margin-top: 0.25rem;
+        }
+
+        .confidence-bar-fill {
+            background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+            height: 100%;
+            border-radius: 4px;
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .reasoning-text {
+            font-size: 0.9rem;
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        .summary-text {
+            font-size: 0.95rem;
+            color: var(--text-main);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .components-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .component-tag {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-color);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-family: var(--font-mono);
+            color: var(--text-muted);
+        }
+
+        /* Remediation steps styling */
+        .remediation-section h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-title);
+        }
+
+        .step-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1.25rem;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            background: rgba(255, 255, 255, 0.015);
+            transition: border-color 0.2s ease;
+        }
+
+        .step-item:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .step-num {
+            width: 24px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .step-meta {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .badge-risk {
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .risk-high { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .risk-medium { background: rgba(249, 115, 22, 0.15); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.3); }
+        .risk-low { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+        .est-minutes {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .command-block {
+            background: #04060b;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            padding: 0.75rem;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            overflow-x: auto;
+            color: #34d399;
+        }
+
+        .btn-copy-small {
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            color: var(--text-muted);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: var(--font-main);
+            font-weight: 600;
+        }
+
+        .btn-copy-small:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: var(--text-title);
+        }
+
+        /* Comms Panel */
+        .comms-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .comms-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .comms-card {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .comms-body {
+            background: #020617;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.25rem;
+            font-size: 0.9rem;
+            min-height: 120px;
+            position: relative;
+            color: var(--text-main);
+        }
+
+        .comms-footer {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn-copy {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-copy:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Slack Mock Layout */
+        .slack-mock-badge {
+            background: #4a154b;
+            color: white;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .status-mock-badge {
+            background: #0284c7;
+            color: white;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Incident Commander</h1>
+            </div>
+            <div class="header-meta">
+                <div class="meta-tag">ADK Agents Online</div>
+                <div class="meta-tag" id="network-tag">Local Engine</div>
+            </div>
+        </header>
+
+        <div class="layout-grid">
+            <!-- Form Input Panel -->
+            <div class="panel">
+                <div class="panel-title">
+                    <span>Incident Triggers</span>
+                </div>
+                
+                <div class="form-group demo-picker-card">
+                    <label for="demo-select">Load Demo Incident</label>
+                    <select id="demo-select">
+                        <option value="">-- Choose a pre-configured incident --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="service-input">Affected Service</label>
+                    <input type="text" id="service-input" placeholder="e.g. payments-service">
+                </div>
+
+                <div class="form-group">
+                    <label for="log-input">Raw Log String</label>
+                    <textarea id="log-input" placeholder="Paste production error stacktrace or system alert here..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="history-input">Incident Context/History (Optional)</label>
+                    <textarea id="history-input" placeholder="Any recent deployment data, DB scaling notes, or related incidents..."></textarea>
+                </div>
+
+                <button class="btn-submit" id="btn-submit">
+                    <span>Run Incident Pipeline</span>
+                </button>
+
+                <!-- Progress Steps tracker -->
+                <div class="progress-overlay" id="progress-overlay">
+                    <div class="progress-step" id="step-alert">
+                        <div class="step-indicator">1</div>
+                        <span>Alert Analyzer...</span>
+                        <span class="spinner" style="display:none;" id="spin-alert"></span>
+                    </div>
+                    <div class="progress-step" id="step-rc">
+                        <div class="step-indicator">2</div>
+                        <span>Root Cause Diagnosis...</span>
+                        <span class="spinner" style="display:none;" id="spin-rc"></span>
+                    </div>
+                    <div class="progress-step" id="step-remediation">
+                        <div class="step-indicator">3</div>
+                        <span>Parallel Remedies & Comms...</span>
+                        <span class="spinner" style="display:none;" id="spin-remediation"></span>
+                    </div>
+                    <div class="progress-step" id="step-merge">
+                        <div class="step-indicator">4</div>
+                        <span>Compiling Incident Report...</span>
+                        <span class="spinner" style="display:none;" id="spin-merge"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Output Area -->
+            <div class="panel" style="min-height: 500px; flex-grow: 1;">
+                <div class="panel-title">Incident Analysis Report</div>
+                
+                <div class="empty-state" id="empty-state">
+                    <div class="empty-state-icon">📡</div>
+                    <h3>Waiting for Incident Trigger</h3>
+                    <p>Select a demo incident or paste a custom log to run the agentic recovery pipeline.</p>
+                </div>
+
+                <div class="results-container" id="results-container" style="display: none;">
+                    <div class="report-header">
+                        <div class="service-info">
+                            <h2 id="report-service">payments-service</h2>
+                            <p id="report-error">Error Type: connection_pool_exhausted</p>
+                        </div>
+                        <span class="badge-severity" id="report-severity">P1</span>
+                    </div>
+
+                    <div class="overview-grid">
+                        <!-- Alert Summary -->
+                        <div class="card">
+                            <div class="card-header-small">
+                                <span>Alert Summary</span>
+                                <span id="report-time">2026-06-26 14:00</span>
+                            </div>
+                            <div class="summary-text" id="report-summary">PostgreSQL connection pool exhausted.</div>
+                            <div class="components-list" id="report-components">
+                                <span class="component-tag">database</span>
+                            </div>
+                        </div>
+
+                        <!-- Diagnosis -->
+                        <div class="card">
+                            <div class="card-header-small">
+                                <span>Diagnostic Result</span>
+                                <span id="report-confidence">Confidence: 95%</span>
+                            </div>
+                            <div class="root-cause-val" id="report-cause">resource_exhaustion</div>
+                            <div class="confidence-container">
+                                <div class="confidence-bar-bg">
+                                    <div class="confidence-bar-fill" id="report-confidence-bar" style="width: 95%;"></div>
+                                </div>
+                            </div>
+                            <div class="reasoning-text" id="report-reasoning" style="margin-top: 0.75rem;">HikariCP connection pool limits reached.</div>
+                        </div>
+                    </div>
+
+                    <!-- Remediation -->
+                    <div class="remediation-section">
+                        <h3>Recommended Remediation Playbook</h3>
+                        <div id="remediation-steps-list">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Communications -->
+                    <div>
+                        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-title);">Incident Notifications Draft</h3>
+                        <div class="comms-grid">
+                            <!-- Slack Msg -->
+                            <div class="comms-card">
+                                <div class="card-header-small">
+                                    <span>Slack Alert (#incidents)</span>
+                                    <span class="slack-mock-badge">Slack</span>
+                                </div>
+                                <div class="comms-body" id="slack-text">
+                                    Loading...
+                                </div>
+                                <div class="comms-footer">
+                                    <button class="btn-copy" id="btn-copy-slack">Copy Slack Post</button>
+                                </div>
+                            </div>
+
+                            <!-- Status Page -->
+                            <div class="comms-card">
+                                <div class="card-header-small">
+                                    <span>Status Page Update</span>
+                                    <span class="status-mock-badge">StatusPage</span>
+                                </div>
+                                <div class="comms-body" id="statuspage-text">
+                                    Loading...
+                                </div>
+                                <div class="comms-footer">
+                                    <button class="btn-copy" id="btn-copy-statuspage">Copy Public Update</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let demoIncidents = [];
+
+        // Load demo incidents from API
+        async function loadDemoIncidents() {
+            try {
+                const response = await fetch('/demo-incidents');
+                if (response.ok) {
+                    demoIncidents = await response.json();
+                    populateDemoSelector();
+                }
+            } catch (error) {
+                console.error("Failed to load demo incidents", error);
+            }
+        }
+
+        function populateDemoSelector() {
+            const selector = document.getElementById('demo-select');
+            demoIncidents.forEach((inc, index) => {
+                const opt = document.createElement('option');
+                opt.value = index;
+                // Truncate the log description for display
+                const serviceLabel = inc.service;
+                const errLabel = inc.raw_log.length > 50 ? inc.raw_log.substring(0, 50) + "..." : inc.raw_log;
+                opt.textContent = `${serviceLabel} - ${errLabel}`;
+                selector.appendChild(opt);
+            });
+        }
+
+        // Handle Demo Selection change
+        document.getElementById('demo-select').addEventListener('change', (e) => {
+            const val = e.target.value;
+            if (val !== "") {
+                const data = demoIncidents[parseInt(val)];
+                document.getElementById('service-input').value = data.service;
+                document.getElementById('log-input').value = data.raw_log;
+                document.getElementById('history-input').value = data.history || "";
+            } else {
+                document.getElementById('service-input').value = "";
+                document.getElementById('log-input').value = "";
+                document.getElementById('history-input').value = "";
+            }
+        });
+
+        // Setup triggers
+        const btnSubmit = document.getElementById('btn-submit');
+        const progressOverlay = document.getElementById('progress-overlay');
+        const emptyState = document.getElementById('empty-state');
+        const resultsContainer = document.getElementById('results-container');
+
+        const steps = {
+            alert: document.getElementById('step-alert'),
+            rc: document.getElementById('step-rc'),
+            remediation: document.getElementById('step-remediation'),
+            merge: document.getElementById('step-merge')
+        };
+        const spinners = {
+            alert: document.getElementById('spin-alert'),
+            rc: document.getElementById('spin-rc'),
+            remediation: document.getElementById('spin-remediation'),
+            merge: document.getElementById('spin-merge')
+        };
+
+        function resetProgress() {
+            Object.keys(steps).forEach(key => {
+                steps[key].className = 'progress-step';
+                spinners[key].style.display = 'none';
+            });
+        }
+
+        function setStepActive(key) {
+            resetProgress();
+            steps[key].classList.add('active');
+            spinners[key].style.display = 'inline-block';
+            
+            // Mark prior steps as completed
+            const keys = Object.keys(steps);
+            const idx = keys.indexOf(key);
+            for (let i = 0; i < idx; i++) {
+                steps[keys[i]].classList.add('completed');
+            }
+        }
+
+        function setAllCompleted() {
+            Object.keys(steps).forEach(key => {
+                steps[key].className = 'progress-step completed';
+                spinners[key].style.display = 'none';
+            });
+        }
+
+        btnSubmit.addEventListener('click', async () => {
+            const rawLog = document.getElementById('log-input').value.trim();
+            const service = document.getElementById('service-input').value.trim();
+            const history = document.getElementById('history-input').value.trim();
+
+            if (!rawLog || !service) {
+                alert("Please provide both service name and raw log!");
+                return;
+            }
+
+            // UI adjustments
+            btnSubmit.disabled = true;
+            emptyState.style.display = 'none';
+            resultsContainer.style.display = 'none';
+            progressOverlay.style.display = 'flex';
+            
+            try {
+                // Simulate progressive states (each takes at least some visible time for demo UI experience)
+                setStepActive('alert');
+                await delay(800);
+                
+                setStepActive('rc');
+                await delay(1000);
+                
+                setStepActive('remediation');
+                await delay(1200);
+                
+                setStepActive('merge');
+                
+                // Real call to FastAPI backend
+                const response = await fetch('/incident', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ raw_log: rawLog, service, history })
+                });
+
+                if (!response.ok) {
+                    const detail = await response.text();
+                    throw new Error(detail || "Pipeline failed");
+                }
+
+                const report = await response.json();
+                setAllCompleted();
+                await delay(400);
+
+                // Render result
+                progressOverlay.style.display = 'none';
+                renderReport(report);
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+                progressOverlay.style.display = 'none';
+                emptyState.style.display = 'flex';
+            } finally {
+                btnSubmit.disabled = false;
+            }
+        });
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function renderReport(report) {
+            resultsContainer.style.display = 'flex';
+
+            // Top header metadata
+            document.getElementById('report-service').textContent = report.service || "unknown-service";
+            document.getElementById('report-error').textContent = `Error Type: ${report.error_type || "Generic Error"}`;
+            
+            const sevBadge = document.getElementById('report-severity');
+            sevBadge.textContent = report.severity || "P2";
+            sevBadge.className = `badge-severity severity-${report.severity || "P2"}`;
+
+            // Left card metadata
+            document.getElementById('report-time').textContent = report.timestamp || "unknown time";
+            document.getElementById('report-summary').textContent = report.raw_summary || "";
+            
+            const compList = document.getElementById('report-components');
+            compList.innerHTML = "";
+            const components = report.affected_components || [];
+            components.forEach(c => {
+                const tag = document.createElement('span');
+                tag.className = 'component-tag';
+                tag.textContent = c;
+                compList.appendChild(tag);
+            });
+
+            // Right card diagnostic
+            const rc = report.root_cause_analysis || {};
+            document.getElementById('report-cause').textContent = rc.root_cause || "unknown";
+            const confidence = Math.round((rc.confidence || 0.8) * 100);
+            document.getElementById('report-confidence').textContent = `Confidence: ${confidence}%`;
+            document.getElementById('report-confidence-bar').style.width = `${confidence}%`;
+            document.getElementById('report-reasoning').textContent = rc.reasoning || "";
+
+            // Playbook lists
+            const stepsList = document.getElementById('remediation-steps-list');
+            stepsList.innerHTML = "";
+            const remedies = report.remediation || [];
+            remedies.forEach((rem, idx) => {
+                const stepItem = document.createElement('div');
+                stepItem.className = 'step-item';
+
+                const num = document.createElement('div');
+                num.className = 'step-num';
+                num.textContent = idx + 1;
+
+                const content = document.createElement('div');
+                content.className = 'step-content';
+
+                const meta = document.createElement('div');
+                meta.className = 'step-meta';
+
+                const rBadge = document.createElement('span');
+                rBadge.className = `badge-risk risk-${(rem.risk || "medium").toLowerCase()}`;
+                rBadge.textContent = rem.risk || "medium";
+
+                const est = document.createElement('span');
+                est.className = 'est-minutes';
+                est.textContent = `Est: ${rem.estimated_minutes || 5} min`;
+
+                meta.appendChild(rBadge);
+                meta.appendChild(est);
+
+                const desc = document.createElement('div');
+                desc.style.fontWeight = '600';
+                desc.textContent = rem.action;
+
+                content.appendChild(desc);
+                content.appendChild(meta);
+
+                if (rem.command_hint) {
+                    const block = document.createElement('div');
+                    block.className = 'command-block';
+
+                    const code = document.createElement('span');
+                    code.textContent = rem.command_hint;
+
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = 'btn-copy-small';
+                    copyBtn.textContent = 'Copy';
+                    copyBtn.addEventListener('click', () => {
+                        navigator.clipboard.writeText(rem.command_hint);
+                        copyBtn.textContent = 'Copied!';
+                        setTimeout(() => copyBtn.textContent = 'Copy', 1500);
+                    });
+
+                    block.appendChild(code);
+                    block.appendChild(copyBtn);
+                    content.appendChild(block);
+                }
+
+                stepItem.appendChild(num);
+                stepItem.appendChild(content);
+                stepsList.appendChild(stepItem);
+            });
+
+            // Communications text blocks
+            const comms = report.communications || {};
+            document.getElementById('slack-text').textContent = comms.slack_message || "No slack message generated.";
+            document.getElementById('statuspage-text').textContent = comms.status_page_update || "No status page update generated.";
+        }
+
+        // Setup general copy buttons
+        document.getElementById('btn-copy-slack').addEventListener('click', (e) => {
+            const txt = document.getElementById('slack-text').textContent;
+            navigator.clipboard.writeText(txt);
+            e.target.textContent = 'Slack Draft Copied!';
+            setTimeout(() => e.target.textContent = 'Copy Slack Post', 2000);
+        });
+
+        document.getElementById('btn-copy-statuspage').addEventListener('click', (e) => {
+            const txt = document.getElementById('statuspage-text').textContent;
+            navigator.clipboard.writeText(txt);
+            e.target.textContent = 'Status Page Copied!';
+            setTimeout(() => e.target.textContent = 'Copy Public Update', 2000);
+        });
+
+        // Initialize page
+        window.addEventListener('DOMContentLoaded', () => {
+            loadDemoIncidents();
+        });
+    </script>
+</body>
+</html>

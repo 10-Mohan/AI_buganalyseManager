@@ -1,0 +1,11 @@
+# incident-manager/requirements.txt
+google-adk
+google-genai
+fastapi
+uvicorn
+jinja2
+pydantic
+requests
+python-dotenv
+pyyaml
+httpx

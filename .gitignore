@@ -1,0 +1,22 @@
+# Python virtual environments
+venv/
+.venv/
+env/
+
+# Environment secrets
+.env
+*.env
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS/IDE files
+.DS_Store
+.idea/
+.vscode/
+
+# Local task/log artifacts
+.system_generated/
+*.log
